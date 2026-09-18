@@ -334,24 +334,25 @@ _BULLET_RE = re.compile(r"^\((\d+)\)\s+\*\*([^*]+?)\*\*\s*(.+)$")
 _BIBL_RE = re.compile(r"^\[\[bibliography(?::\s*(.+?))?\]\]\s*$")
 
 
-def _is_cjk(ch):
-    o = ord(ch)
-    return (0x2E80 <= o <= 0x9FFF        # radicals, kana, CJK ideographs
-            or 0x3000 <= o <= 0x303F     # CJK punctuation
-            or 0xFF00 <= o <= 0xFFEF)    # fullwidth forms
+def _needs_space(a, b):
+    """A soft line break needs a space only between two ASCII characters.
+
+    Testing "is it CJK?" is too narrow: Chinese prose is full of characters
+    outside the CJK blocks — curly quotes “ ” (U+201C/D), the em dash —, the
+    ellipsis … — and each of them would wrongly gain a leading space.
+    Anything non-ASCII is treated as CJK-adjacent instead.
+    """
+    return a.isascii() and b.isascii() and not a.isspace() and not b.isspace()
 
 
 def _join_lines(lines):
-    """Join soft-wrapped lines: nothing between two CJK chars, else a space."""
+    """Join soft-wrapped lines back into one paragraph."""
     out = ""
     for line in lines:
         if not out:
             out = line
             continue
-        if _is_cjk(out[-1]) and _is_cjk(line[0]):
-            out += line
-        else:
-            out += " " + line
+        out += (" " + line) if _needs_space(out[-1], line[0]) else line
     return out
 
 

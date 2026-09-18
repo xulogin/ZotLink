@@ -73,7 +73,7 @@ title: 文档标题
 [[bibliography: 参考文献 / References]]
 ```
 
-同一段内的换行自动接续（中文之间不加空格、英文之间加空格），空行分段。
+同一段内的换行自动接续（只有两边都是 ASCII 时才补空格，中文之间不补），空行分段。
 `[[bibliography]]` 是参考文献占位符，Refresh 时被替换成正式列表；漏了它
 build 会给出 warning。
 
