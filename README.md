@@ -4,9 +4,9 @@
 在 Word 里点一次 Zotero → Refresh，全文引用和参考文献列表自动成型；之后换期刊
 样式（RSE / ISPRS / GB-T 7714 / Nature …）只需在 Word 里选一下，不用重新生成文档。
 
-同时是一个 [Claude Code](https://claude.com/claude-code) skill —— 装好之后直接对
-Claude 说「加一篇关于 X 的文献，引用在第二段」「我改了正文，重跑」「参考文献里
-有奇怪的字」，它就按这套管线执行。
+同时是一个 [Claude Code](https://claude.com/claude-code) / Codex **插件**——一条命令
+装好之后，直接说「加一篇关于 X 的文献，引用在第二段」「我改了正文，重跑」
+「参考文献里有奇怪的字」，它就按这套管线执行。
 
 ---
 
@@ -43,25 +43,33 @@ Zotero 数据目录和 localUserKey 都是自动探测的（读 profile 的 `pre
 
 ## 安装
 
-### 作为 Claude Code skill
-
-```powershell
-git clone https://github.com/xulogin/ZotLink "$env:USERPROFILE\.claude\skills\zotlink"
-```
-
-macOS / Linux：
+### Claude Code（推荐）
 
 ```bash
-git clone https://github.com/xulogin/ZotLink ~/.claude/skills/zotlink
+claude plugin marketplace add xulogin/ZotLink
+claude plugin install zotlink@zotlink
 ```
 
-重开 Claude Code，`/zotlink` 就在了。
+装完重开 Claude Code，`/zotlink` 就在了。更新：`uninstall` 再 `install`
+（插件 version 不变时 `plugin update` 会误判"已最新"）。
 
-### 只当命令行工具用
+### Codex
 
-clone 到任何地方，直接调 `scripts/` 下的脚本即可，skill 部分不影响使用。
+```bash
+git clone https://github.com/xulogin/ZotLink
+```
+
+Codex 读 `.codex-plugin/plugin.json`，skill 在 `skills/zotlink/`。
+注意 Codex 里 `${CLAUDE_PLUGIN_ROOT}` **不会展开**，SKILL.md 里的 `<ZotLink>`
+要自己算成绝对路径。
+
+### 不用 AI，只当命令行工具
+
+clone 到任何地方，直接调 `scripts/` 下的脚本，插件部分不影响使用。
 
 ## 用法
+
+下面的 `<ZotLink>` 指插件 / 仓库根目录。
 
 ```powershell
 # 0. 自检
@@ -138,10 +146,10 @@ title: 文档标题
 
 ## 更多
 
-- [`SKILL.md`](SKILL.md) — 给 Claude 看的操作手册
-- [`references/internals.md`](references/internals.md) — URI 匹配原理、匹配策略优先级、docx 字段结构
-- [`references/gotchas.md`](references/gotchas.md) — 实跑撞出来的坑（代理 502、中文排版空格、AMBIG 重复导入 …）
-- [`references/troubleshooting.md`](references/troubleshooting.md) — 失败模式对照表
+- [`skills/zotlink/SKILL.md`](skills/zotlink/SKILL.md) — 给 Claude 看的操作手册
+- [`skills/zotlink/references/internals.md`](skills/zotlink/references/internals.md) — URI 匹配原理、匹配策略优先级、docx 字段结构
+- [`skills/zotlink/references/gotchas.md`](skills/zotlink/references/gotchas.md) — 实跑撞出来的坑（代理 502、中文排版空格、AMBIG 重复导入 …）
+- [`skills/zotlink/references/troubleshooting.md`](skills/zotlink/references/troubleshooting.md) — 失败模式对照表
 
 ## License
 

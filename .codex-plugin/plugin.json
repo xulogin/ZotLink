@@ -1,0 +1,47 @@
+{
+  "name": "zotlink",
+  "version": "1.0.0",
+  "description": "Markdown 正文 + BibTeX 文献 → 带 Zotero 活动字段的 Word 文档：在 Word 里点一次 Zotero → Refresh，全文引用和参考文献列表自动成型，零弹窗，之后随时换期刊样式。顺带扫掉中文聚合器塞进 Zotero 的基金号 / ORCID / 中科院分区等脏字段。",
+  "author": {
+    "name": "Haifeng Xu",
+    "email": "xuhf@swfu.edu.cn",
+    "url": "https://github.com/xulogin"
+  },
+  "homepage": "https://github.com/xulogin/ZotLink",
+  "repository": "https://github.com/xulogin/ZotLink",
+  "license": "MIT",
+  "keywords": [
+    "zotero",
+    "bibtex",
+    "citation",
+    "docx",
+    "word",
+    "reference-manager",
+    "csl",
+    "pandoc",
+    "academic-writing",
+    "参考文献",
+    "引用",
+    "公式化写作",
+    "遥感",
+    "论文"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "ZotLink",
+    "shortDescription": "Zotero ↔ Word 引文管线，Refresh 零弹窗",
+    "longDescription": "自己拼的 docx 在 Zotero Refresh 时会一篇一篇弹「请选择条目」，因为引文字段里没有 URI。ZotLink 先读 zotero.sqlite 把每个 citekey 绑定到真实 itemKey，再把真实 URI 烘焙进 CSL_CITATION 字段，所以 Refresh 一次过。跑完还有 verify_docx 逐字段核对，不靠「没报错」下结论。",
+    "developerName": "Haifeng Xu",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "加一篇关于遥感大数据的文献，引用在第二段",
+      "参考文献里出现了「基金项目」「中科院一区」这种乱字，帮我清一下"
+    ],
+    "websiteURL": "https://github.com/xulogin/ZotLink"
+  }
+}

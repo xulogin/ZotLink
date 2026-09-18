@@ -361,7 +361,12 @@ def _needs_space(a, b):
     ca, cb = _char_class(a), _char_class(b)
     if ca == "punct" or cb == "punct":
         return False
-    return not (ca == "han" and cb == "han")
+    if ca == "ascii" and cb == "ascii":
+        return True
+    # Han next to ASCII: only real Latin content earns the space. An ASCII
+    # quote used as a Chinese quote (取代"如何看得见") must not.
+    other = b if ca == "han" else a
+    return other.isalnum() or other in "([{)]}"
 
 
 def _join_lines(lines):

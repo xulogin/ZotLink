@@ -26,11 +26,22 @@ CSL_CITATION 字段。Refresh 时 Zotero 按 URI 一查就到——不弹窗、�
 
 不适用：不需要 Zotero 的纯 Markdown→docx 转换（直接用 pandoc 就行）。
 
+## 工具在哪（下面写 `<ZotLink>` 的地方全指它）
+
+**`<ZotLink>` = 本文件所在目录的上两级**（本文件是 `<ZotLink>/skills/zotlink/SKILL.md`）。
+
+- **Claude Code**：可以直接用 `${CLAUDE_PLUGIN_ROOT}`，会自动展开成绝对路径
+- **Codex / 其他环境**：`${CLAUDE_PLUGIN_ROOT}` **不会展开**。先把 `<ZotLink>` 算成
+  实际绝对路径再执行，**不要把 `${...}` 原样敲进终端**
+- **没装插件、直接 clone 的**：`<ZotLink>` 就是仓库根目录
+
+无论哪种情况，**都不要问用户路径**——你自己能算出来。
+
 ## 一条命令跑全程
 
 ```powershell
 cd "<项目目录>"
-python "$env:USERPROFILE\.claude\skills\zotlink\scripts\run.py"
+python "<ZotLink>/scripts/run.py"
 ```
 
 `run.py` 按顺序做完这六步，已经是最新的会自动跳过：
@@ -47,7 +58,7 @@ python "$env:USERPROFILE\.claude\skills\zotlink\scripts\run.py"
 跑完**必须验一遍**，别只看"没报错"：
 
 ```powershell
-python "$env:USERPROFILE\.claude\skills\zotlink\scripts\verify_docx.py"
+python "<ZotLink>/scripts/verify_docx.py"
 ```
 
 它拆开 docx 的 `word/document.xml`，核对引用字段数 == 正文标记数、每个
@@ -83,10 +94,10 @@ build 会给出 warning。
 |---|---|
 | "加一篇关于 X 的文献，引用在第 N 段" | 查到真实 DOI/BibTeX（**不许编造**）→ 追加进 `data/references.bib`（key 用 `姓+年份+首个实词`，重姓加名首字母如 `liuc`/`liuj`）→ 在 md 里插 `[[cite:key]]` → 跑 run.py → 跑 verify_docx.py |
 | "我改了正文，重跑" | 直接 run.py（前几步自动跳过，几秒出 docx）|
-| "参考文献里有奇怪的字 [贴一段]" | 跑 `zot_scan_dirty.py` 定位 → 让用户**关掉 Zotero** → `zot_clean_dirty.py --yes`（自动备份 + 事务）→ 让用户重开 Zotero 和 Word 再 Refresh |
+| "参考文献里有奇怪的字 [贴一段]" | 跑 `<ZotLink>/scripts/zot_scan_dirty.py` 定位 → 让用户**关掉 Zotero** → `<ZotLink>/scripts/zot_clean_dirty.py --yes`（自动备份 + 事务）→ 让用户重开 Zotero 和 Word 再 Refresh |
 | "切到 Nature 样式" | 告诉用户：Word → Zotero ribbon → Document Preferences → 选样式 → OK。**这步是 GUI，脚本动不了**，全文引用会一起重排，不用重新生成 docx |
-| "新建一个项目叫 X" | `python scripts/new_project.py <目录> --title "X" --name <文件名>` |
-| "环境是不是配好了" | `python scripts/doctor.py` |
+| "新建一个项目叫 X" | `python "<ZotLink>/scripts/new_project.py" <目录> --title "X" --name <文件名>` |
+| "环境是不是配好了" | `python "<ZotLink>/scripts/doctor.py"` |
 
 ## 硬规矩
 

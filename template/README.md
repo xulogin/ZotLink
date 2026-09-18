@@ -17,9 +17,14 @@ BibTeX 文献 → 带 Zotero 活动字段的 docx，在 Word 里 Refresh 即可�
 
 ## 跑一次
 
+最省事：在本目录开 Claude Code，直接说「我改了正文，重跑」，或者用 `/zotlink`。
+
+手动跑（`<ZotLink>` = ZotLink 插件 / 仓库根目录）：
+
 ```powershell
 cd "<本项目目录>"
-python "$env:USERPROFILE\.claude\skills\zotlink\scripts\run.py"
+python "<ZotLink>\scripts\run.py"
+python "<ZotLink>\scripts\verify_docx.py"
 ```
 
 然后打开 `output/{{NAME}}.docx` → Word 顶部 Zotero → **Refresh**。

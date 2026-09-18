@@ -1,0 +1,15 @@
+{
+  "name": "zotlink",
+  "owner": {
+    "name": "Haifeng Xu",
+    "url": "https://github.com/xulogin"
+  },
+  "plugins": [
+    {
+      "name": "zotlink",
+      "source": "./",
+      "description": "Zotero ↔ Word 引文管线：Markdown + BibTeX 一条命令出带活动字段的 docx，Refresh 零弹窗。",
+      "version": "1.0.0"
+    }
+  ]
+}
