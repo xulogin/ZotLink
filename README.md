@@ -119,6 +119,8 @@ python <ZotLink>\scripts\verify_docx.py                  # 核对（"跑通" ≠
 | `zot_match.py` | citekey → Zotero itemKey 匹配，出报告和 `references_missing.bib` |
 | `zot_scan_dirty.py` | 扫聚合器污染字段（只读）|
 | `zot_clean_dirty.py` | 清理脏字段（**会写库**：Zotero 必须关，自动备份，单事务）|
+| `fix_bilingual_style.py` | 打开 GB/T 7714 样式的双语开关（中文出 `等`，英文出 `et al.`），另存新样式不动原文件 |
+| `zot_language.py` | `language` 字段体检 / 规范化（双语开关靠它生效；`--fix` 会写库）|
 | `build_doc.py` | Markdown → 带 Zotero 字段的 docx |
 | `verify_docx.py` | 拆开 docx 核对引用字段，Refresh 前的门禁 |
 | `zot_env.py` | 路径 / 库身份 / 连接的统一解析 |

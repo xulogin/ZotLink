@@ -127,6 +127,45 @@ AMBIG 再导一次只会**再多一份**，下次更分不清，恶性循环。
 
 ---
 
+## 7.5 英文文献也被打成「等」—— 不是样式坏，是开关没开
+
+**症状**：Refresh 出来的参考文献和正文引用，英文文献也写成 `Ma等, 2015`、
+`CHI M, PLAZA A, BENEDIKTSSON J A, 等`。GB/T 7714-2015 要求
+**中文文献用「等」、英文文献用「et al.」**，所以这是错的。
+
+**真因**：两层，缺一不可。
+
+1. Zotero 自带的 GB/T 7714 样式用 **CSL-M 多布局**实现双语
+   （`<layout ... locale="en">` 一个给正文引用、一个给参考文献表），
+   但**出厂就是注释掉的**，样式作者还在上面留了一行中文提示
+   「取消这部分注释可以开启 CSL-M 的多语言功能」。默认状态下全都走中文布局。
+2. 就算开了布局，citeproc 是按**每条文献的 `language` 字段**挑布局的。
+   实测这个字段在真实库里非常脏：990 条里 273 条为空、还有
+   `中文;` `英文;` `english` 这种自由文本。**空值和非 BCP-47 值都匹配不上 `locale="en"`**，
+   于是英文文献照样落回中文布局，照样出「等」。
+
+**怎么办**：
+
+```powershell
+python "<ZotLink>/scripts/zot_language.py" --all     # 先体检（只读）
+# 关掉 Zotero 之后：
+python "<ZotLink>/scripts/zot_language.py" --all --fix
+python "<ZotLink>/scripts/fix_bilingual_style.py"    # 开样式的双语开关
+```
+
+注意三点：
+
+- `fix_bilingual_style.py` **另存成新 id / 新标题的样式，不改原文件**，
+  不想要删掉那个 .csl 就行
+- 改完样式必须**完全退出再重开 Zotero**——样式列表只在启动时扫描
+- 然后 Word → Zotero → Document Preferences 选新样式 → Refresh
+- 规范化 `language` 时，**先认用户自己写的标注**（`英文;` → `en`），
+  认不出再看标题是不是 CJK，**没有标题就不猜**
+
+**顺带**：样式文件夹里常有现成的「双语」版本（文件名带「双语」或 `bilan`），
+开关是打开的，但通常同时是「无 URL、DOI」版——换过去会丢 DOI。
+所以宁可给当前样式打补丁，也别盲目换。
+
 ## 8. 「跑通」≠「对」
 
 **症状**：零报错，docx 也出来了，Word 里 Refresh 一片弹窗。

@@ -95,6 +95,8 @@ build 会给出 warning。
 | "加一篇关于 X 的文献，引用在第 N 段" | 查到真实 DOI/BibTeX（**不许编造**）→ 追加进 `data/references.bib`（key 用 `姓+年份+首个实词`，重姓加名首字母如 `liuc`/`liuj`）→ 在 md 里插 `[[cite:key]]` → 跑 run.py → 跑 verify_docx.py |
 | "我改了正文，重跑" | 直接 run.py（前几步自动跳过，几秒出 docx）|
 | "参考文献里有奇怪的字 [贴一段]" | 跑 `<ZotLink>/scripts/zot_scan_dirty.py` 定位 → 让用户**关掉 Zotero** → `<ZotLink>/scripts/zot_clean_dirty.py --yes`（自动备份 + 事务）→ 让用户重开 Zotero 和 Word 再 Refresh |
+| "参考文献里英文文献也写成「等」/ 想让中文出「等」英文出 et al." | GB/T 7714 样式自带 CSL-M 双语开关但被注释掉了。跑 `python "<ZotLink>/scripts/fix_bilingual_style.py"` 生成一个双语副本（不动原样式）→ 让用户**完全退出再重开 Zotero** → Word → Document Preferences 选新样式 → Refresh。**先跑 `zot_language.py` 体检**：开关靠每条的 `language` 字段决定走哪条布局，字段为空的英文文献照样出「等」 |
+| "language 字段乱 / 空" | `python "<ZotLink>/scripts/zot_language.py" [--all]` 只读体检出报告；要真改得让用户**关掉 Zotero** 再 `--fix`（自动备份 + 单事务）|
 | "切到 Nature 样式" | 告诉用户：Word → Zotero ribbon → Document Preferences → 选样式 → OK。**这步是 GUI，脚本动不了**，全文引用会一起重排，不用重新生成 docx |
 | "新建一个项目叫 X" | `python "<ZotLink>/scripts/new_project.py" <目录> --title "X" --name <文件名>` |
 | "环境是不是配好了" | `python "<ZotLink>/scripts/doctor.py"` |
@@ -124,6 +126,21 @@ build 会给出 warning。
   否则越导越多。`zot_match.py` 已把它们排除在 `references_missing.bib` 之外。
 - **默认 Zotero 路径常常是空库**。怀疑匹配不上之前，先跑 `doctor.py` 看它
   实际读的是哪个 `zotero.sqlite`、多少条目。
+
+## 等 / et al. —— 中英文分开输出
+
+GB/T 7714-2015 要求 **and-others 跟着文献自己的语种走**：中文文献 `等`，
+英文文献 `et al.`。Zotero 自带的 GB/T 样式用 CSL-M 多布局实现了这件事，
+但**出厂是注释掉的**，所以全都打成「等」。两个前提缺一不可：
+
+1. **样式要开双语布局** —— `fix_bilingual_style.py` 把 `<layout ... locale="en">`
+   的注释去掉，另存成一个新 id/新标题的样式，原样式一个字节都不改。
+2. **条目的 `language` 字段要是 citeproc 认得的值**（`en` / `en-US` / `zh` …）。
+   空值或 `中文;` / `english` 这种自由文本匹配不上，会一律落回默认（中文）布局。
+   `zot_language.py` 体检 + 规范化：先认用户自己写的标注，认不出再看标题是不是 CJK，
+   **没标题就不猜**。
+
+改完样式必须让用户**完全退出再重开 Zotero**——样式列表只在启动时扫描。
 
 ## 环境与配置
 

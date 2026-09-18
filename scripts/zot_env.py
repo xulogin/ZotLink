@@ -143,6 +143,19 @@ def _data_dir_from_prefs():
     return None
 
 
+def last_style_id(cfg=None):
+    """The CSL style id Zotero used last, from prefs.js (None if unknown)."""
+    pat = re.compile(r'user_pref\("extensions\.zotero\.export\.lastStyle",\s*"(.*?)"\s*\)')
+    for prefs in _prefs_candidates():
+        try:
+            m = pat.search(prefs.read_text(encoding="utf-8", errors="replace"))
+        except Exception:
+            continue
+        if m:
+            return m.group(1)
+    return None
+
+
 def find_data_dir(cfg=None):
     """Zotero data directory (the folder holding zotero.sqlite)."""
     cfg = cfg or {}
