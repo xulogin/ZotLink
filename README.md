@@ -132,7 +132,7 @@ title: 文档标题
 [[bibliography: 参考文献 / References]]
 ````
 
-同一段内换行自动接续（只有两边都是 ASCII 时才补空格，中文之间不补），空行分段。
+同一段内换行自动接续：汉字之间不补空格，汉字接 Latin（引用括号就在这）补空格，遇到中文标点不补；空行分段。
 排版（Times New Roman + 宋体/黑体、1.5 倍行距、0.74 cm 首行缩进）写在
 `build_doc.py` 的 `add_*` 函数里，要改版式改那里。
 
@@ -140,6 +140,7 @@ title: 文档标题
 
 - [`SKILL.md`](SKILL.md) — 给 Claude 看的操作手册
 - [`references/internals.md`](references/internals.md) — URI 匹配原理、匹配策略优先级、docx 字段结构
+- [`references/gotchas.md`](references/gotchas.md) — 实跑撞出来的坑（代理 502、中文排版空格、AMBIG 重复导入 …）
 - [`references/troubleshooting.md`](references/troubleshooting.md) — 失败模式对照表
 
 ## License

@@ -42,6 +42,7 @@ import random
 import re
 import string
 import sys
+import unicodedata
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -334,15 +335,33 @@ _BULLET_RE = re.compile(r"^\((\d+)\)\s+\*\*([^*]+?)\*\*\s*(.+)$")
 _BIBL_RE = re.compile(r"^\[\[bibliography(?::\s*(.+?))?\]\]\s*$")
 
 
-def _needs_space(a, b):
-    """A soft line break needs a space only between two ASCII characters.
+def _char_class(ch):
+    """ascii / punct (CJK-style punctuation) / han (everything else non-ASCII)."""
+    if ch.isascii():
+        return "ascii"
+    if unicodedata.category(ch).startswith("P"):
+        return "punct"
+    return "han"
 
-    Testing "is it CJK?" is too narrow: Chinese prose is full of characters
-    outside the CJK blocks — curly quotes “ ” (U+201C/D), the em dash —, the
-    ellipsis … — and each of them would wrongly gain a leading space.
-    Anything non-ASCII is treated as CJK-adjacent instead.
+
+def _needs_space(a, b):
+    """Does a soft line break between `a` and `b` need a space?
+
+    Three cases, and a naive "are both sides CJK?" test gets two of them wrong:
+      汉字 + 汉字            no space   — plain Chinese wrapping
+      汉字 + “ 。 ， — …     no space   — CJK punctuation is NOT in the CJK
+                                         blocks (“ is U+201C), so a block test
+                                         wrongly inserts a space mid-sentence
+      汉字 + (Author, 2020)  space      — 盘古之白: Latin text next to Han text
+                                         reads better with a space, and this is
+                                         exactly where citation markers land
     """
-    return a.isascii() and b.isascii() and not a.isspace() and not b.isspace()
+    if a.isspace() or b.isspace():
+        return False
+    ca, cb = _char_class(a), _char_class(b)
+    if ca == "punct" or cb == "punct":
+        return False
+    return not (ca == "han" and cb == "han")
 
 
 def _join_lines(lines):

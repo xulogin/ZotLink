@@ -73,7 +73,7 @@ title: 文档标题
 [[bibliography: 参考文献 / References]]
 ```
 
-同一段内的换行自动接续（只有两边都是 ASCII 时才补空格，中文之间不补），空行分段。
+同一段内换行自动接续：汉字之间不补空格，汉字接 Latin（引用括号就在这）补空格，遇到中文标点不补；空行分段。
 `[[bibliography]]` 是参考文献占位符，Refresh 时被替换成正式列表；漏了它
 build 会给出 warning。
 
@@ -92,12 +92,27 @@ build 会给出 warning。
 
 1. **交付前必须实跑 + verify_docx，不许只静态看一眼说"应该没问题"。**
    "跑通" ≠ "对"：匹配错条目也是零报错。回头看 `reports/zot_match_report.md`
-   里每条用的什么策略——`doi` / `title` 最稳，`title-fuzzy` 要人眼确认。
-2. **`zot_clean_dirty.py` 会写 Zotero 数据库，Zotero 必须完全关闭。**
-   脚本自己有锁检测和自动备份，但不要绕过它。
-3. **文献信息不许编。** DOI、作者、年份查不到就说查不到，编造的 BibTeX 会
-   在 match 阶段变成 miss，然后被自动 import 成一条垃圾条目进用户的库。
+   里每条用的什么策略——全是 `doi` 才算稳，出现 `title-fuzzy` 必须人眼确认。
+2. **文献信息一个字都不许编。** 写进 `references.bib` 前，每条 DOI 都去
+   `https://api.crossref.org/works/<DOI>` 核一遍 title / 作者 / 卷期页。
+   `/connector/import` 照单全收、不验真伪，编的条目会变成垃圾进用户的库。
+3. **`zot_clean_dirty.py` 会写 Zotero 数据库，Zotero 必须完全关闭。**
+   脚本自己有 connector ping + 锁探测两道栏，不要绕过。
 4. **`data/references.json`、`reports/*` 是生成物，别手改**，删了重跑会重生。
+
+## 几个一定会踩的坑（完整清单见 `references/gotchas.md`）
+
+- **Zotero 明明开着却连不上**：机器上有 `HTTP_PROXY` 时，urllib/curl 连
+  `127.0.0.1:23119` 也走代理，返回 **502**，看起来和"没开"一模一样。
+  必须用 `zot_env.local_opener()`（`ProxyHandler({})`）绕开。
+- **在正文里举例写 `[[cite:a;b]]` 会被当成真引用**直接 FATAL。举例一律写在
+  `%%` 注释行里。
+- **Zotero 导入时会把标题改成 sentence case**，所以 bib 尽量带 DOI，
+  别指望标题匹配。
+- **AMBIG ≠ MISS**：库里已有但分不清哪份重复件的条目，**绝不能**再导一次，
+  否则越导越多。`zot_match.py` 已把它们排除在 `references_missing.bib` 之外。
+- **默认 Zotero 路径常常是空库**。怀疑匹配不上之前，先跑 `doctor.py` 看它
+  实际读的是哪个 `zotero.sqlite`、多少条目。
 
 ## 环境与配置
 
@@ -114,5 +129,6 @@ Better BibTeX**，自动导入走标准 connector）。
 
 ## 更深的东西
 
+- `references/gotchas.md` — 实跑撞出来的坑，动手前先扫一眼
 - `references/internals.md` — URI 匹配原理、匹配策略优先级、脏字段清单、docx 字段结构
 - `references/troubleshooting.md` — 失败模式对照表（Refresh 弹窗 / miss 不降 / 库被改路径 / database is locked …）
