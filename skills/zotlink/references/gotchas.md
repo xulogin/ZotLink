@@ -58,6 +58,25 @@
 
 ---
 
+## 3.5 `"放".isalnum()` 是 True —— 汉字算字母
+
+**症状**：改完换行空格的判据，中文段落里变成 `并行计算 放在同一侧`，汉字之间多了空格。
+更麻烦的是 **`verify_docx.py` 全绿**——它核对的是引用字段，不看排版。
+
+**真因**：Python 的 `str.isalnum()` 对汉字返回 `True`（`Lo` 也算 alphanumeric）。
+判据里写 `other.isalnum()` 想表达"对面是 Latin 字母数字"，结果汉字也命中了。
+
+**怎么办**：两条。
+
+1. 分支要写全，先把 `汉字 + 汉字 → 不补空格` 单独早退掉，
+   再处理"一侧汉字一侧 ASCII"，这样 `isalnum()` 作用的一定是 ASCII 那侧。
+2. **排版类改动必须肉眼看渲染出来的正文**，不能只看 `verify_docx` 绿灯。
+   `scripts/selftest.py` 里有 `_needs_space` 的用例表，改判据先跑它。
+
+```powershell
+python "<ZotLink>/scripts/selftest.py"   # 含排版判据单测
+```
+
 ## 4. 匹配报告的 Markdown 表格没有表头
 
 **症状**：`zot_match_report.md` 打开是一堆竖线，表格渲染不出来。

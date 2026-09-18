@@ -41,57 +41,61 @@ http://zotero.org/users/local/<localUserKey>/items/<itemKey>
 Zotero 数据目录和 localUserKey 都是自动探测的（读 profile 的 `prefs.js` 和
 `zotero.sqlite` 的 settings 表），一般不用配任何东西。
 
-## 安装
+## 最简单的用法
 
-### Claude Code（推荐）
+**一、让 AI 装上它。** 打开 Claude Code 或 Codex，直接说：
 
-```bash
-claude plugin marketplace add xulogin/ZotLink
-claude plugin install zotlink@zotlink
+> 安装 https://github.com/xulogin/ZotLink
+
+**二、直接提需求。** 比如：
+
+> 帮我起一篇关于遥感大数据的引言，找 5 篇高引文献引上
+
+或者在已有的写作项目里：
+
+> 加一篇关于 X 的文献，引用在第二段
+>
+> 我改了正文，重跑
+>
+> 参考文献里出现了「基金项目」「中科院一区」这种乱字，清一下
+
+剩下的它自己干：查 DOI 核实 → 写进 `references.bib` → 匹配 Zotero 库
+（库里没有的自动导入）→ 生成 docx → 拆开 docx 逐字段核对 → 才交给你。
+**中间那些命令都是 AI 自己敲的，你一条都不用输。**
+
+最后你只做一件事：打开 `output\*.docx` → Word 顶部 Zotero → **Refresh**。
+
+## 手动装（可选）
+
+想自己装也行，两条命令：
+
+```text
+Claude Code:   /plugin marketplace add https://github.com/xulogin/ZotLink.git
+               /plugin install zotlink@zotlink
+
+Codex:         codex plugin marketplace add https://github.com/xulogin/ZotLink.git
+               codex plugin add zotlink@zotlink
 ```
 
-装完重开 Claude Code，`/zotlink` 就在了。更新：`uninstall` 再 `install`
-（插件 version 不变时 `plugin update` 会误判"已最新"）。
+需要 Python 3.8+（带 `python-docx`）、pandoc、Zotero 7/8 和 Word 的 Zotero 插件。
+**不需要 Better BibTeX**。Zotero 数据目录会自己从 profile 的 `prefs.js` 读出来。
 
-### Codex
+**用别的 AI 工具？** Gemini CLI / Cursor / Cline 没有插件市场，`git clone` 下来
+让你的 AI 读一遍 `AGENTS.md` 就行。通义灵码 / Zed / GitHub Copilot 会自动读 `AGENTS.md`。
 
-```bash
-git clone https://github.com/xulogin/ZotLink
-```
-
-Codex 读 `.codex-plugin/plugin.json`，skill 在 `skills/zotlink/`。
-注意 Codex 里 `${CLAUDE_PLUGIN_ROOT}` **不会展开**，SKILL.md 里的 `<ZotLink>`
-要自己算成绝对路径。
-
-### 不用 AI，只当命令行工具
-
-clone 到任何地方，直接调 `scripts/` 下的脚本，插件部分不影响使用。
-
-## 用法
-
-下面的 `<ZotLink>` 指插件 / 仓库根目录。
+**不用 AI，只当命令行工具**也行，clone 下来直接调 `scripts/` 里的脚本
+（下面 `<ZotLink>` 就是仓库根目录）：
 
 ```powershell
-# 0. 自检
-python <ZotLink>\scripts\doctor.py
-
-# 1. 新建一个写作项目
+python <ZotLink>\scripts\doctor.py                       # 自检
 python <ZotLink>\scripts\new_project.py "D:\paper\intro" --title "引言" --name introduction
-
-# 2. 往 data/references.bib 里加 BibTeX，往 content/introduction.md 里写正文
-#    引用标记：[[cite:key]] / [[cite:key1;key2]]
-
-# 3. 跑管线
-cd "D:\paper\intro"
-python <ZotLink>\scripts\run.py
-
-# 4. 核对（"跑通" ≠ "对"）
-python <ZotLink>\scripts\verify_docx.py
+cd "D:\paper\intro"                                      # 填 bib + 写正文
+python <ZotLink>\scripts\run.py                          # 跑管线
+python <ZotLink>\scripts\verify_docx.py                  # 核对（"跑通" ≠ "对"）
 ```
 
-然后打开 `output\introduction.docx` → Word 顶部 Zotero → **Refresh**。
-
-`examples/demo/` 是一个五条文献的最小可跑样例，可以直接拿它验证安装。
+`examples/demo/` 是一个五条文献的最小可跑样例，
+`python <ZotLink>\scripts\selftest.py` 会拿它端到端验一遍安装。
 
 ## 项目结构
 

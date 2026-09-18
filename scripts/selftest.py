@@ -39,6 +39,27 @@ def stage(name, argv):
     return r.returncode == 0
 
 
+def typography_cases():
+    """Unit-check the soft-line-break spacing rule.
+
+    verify_docx.py cannot catch this class of bug: a wrong space between 汉字
+    still produces a perfectly valid citation field. Cases live in textjoin.py.
+    """
+    print()
+    print("-" * 60)
+    print("  typography (_needs_space)")
+    print("-" * 60)
+    sys.stdout.flush()
+    import textjoin
+    bad = textjoin.check_cases()
+    for line in bad:
+        print("  FAIL  " + line)
+    if not bad:
+        print("  {} case(s) OK".format(len(textjoin.CASES)))
+    results.append(("typography rules", not bad))
+    return not bad
+
+
 def main():
     if not DEMO.is_dir():
         sys.exit("FATAL: {} missing — is the checkout complete?".format(DEMO))
@@ -47,6 +68,8 @@ def main():
     work = tmp / "demo"
     shutil.copytree(DEMO, work)
     print("workdir {}".format(work))
+
+    typography_cases()
 
     stage("doctor", [str(HERE / "doctor.py"), "--project", str(work)])
     ok_run = stage("run (pandoc -> match -> scan -> build)",
@@ -67,7 +90,7 @@ def main():
 
     # doctor's connector warning is non-fatal, but it exits 0 anyway; the real
     # gate is that the pipeline ran and the docx verified.
-    if ok_run and ok_verify:
+    if ok_run and ok_verify and all(ok for _, ok in results):
         print("SELFTEST PASSED")
         return 0
     print("SELFTEST FAILED — see the output above")

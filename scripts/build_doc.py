@@ -42,10 +42,10 @@ import random
 import re
 import string
 import sys
-import unicodedata
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import textjoin  # noqa: E402
 import zot_env  # noqa: E402
 
 try:
@@ -335,49 +335,7 @@ _BULLET_RE = re.compile(r"^\((\d+)\)\s+\*\*([^*]+?)\*\*\s*(.+)$")
 _BIBL_RE = re.compile(r"^\[\[bibliography(?::\s*(.+?))?\]\]\s*$")
 
 
-def _char_class(ch):
-    """ascii / punct (CJK-style punctuation) / han (everything else non-ASCII)."""
-    if ch.isascii():
-        return "ascii"
-    if unicodedata.category(ch).startswith("P"):
-        return "punct"
-    return "han"
-
-
-def _needs_space(a, b):
-    """Does a soft line break between `a` and `b` need a space?
-
-    Three cases, and a naive "are both sides CJK?" test gets two of them wrong:
-      汉字 + 汉字            no space   — plain Chinese wrapping
-      汉字 + “ 。 ， — …     no space   — CJK punctuation is NOT in the CJK
-                                         blocks (“ is U+201C), so a block test
-                                         wrongly inserts a space mid-sentence
-      汉字 + (Author, 2020)  space      — 盘古之白: Latin text next to Han text
-                                         reads better with a space, and this is
-                                         exactly where citation markers land
-    """
-    if a.isspace() or b.isspace():
-        return False
-    ca, cb = _char_class(a), _char_class(b)
-    if ca == "punct" or cb == "punct":
-        return False
-    if ca == "ascii" and cb == "ascii":
-        return True
-    # Han next to ASCII: only real Latin content earns the space. An ASCII
-    # quote used as a Chinese quote (取代"如何看得见") must not.
-    other = b if ca == "han" else a
-    return other.isalnum() or other in "([{)]}"
-
-
-def _join_lines(lines):
-    """Join soft-wrapped lines back into one paragraph."""
-    out = ""
-    for line in lines:
-        if not out:
-            out = line
-            continue
-        out += (" " + line) if _needs_space(out[-1], line[0]) else line
-    return out
+_join_lines = textjoin.join_lines
 
 
 def parse_markdown(text):
