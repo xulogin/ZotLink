@@ -308,7 +308,9 @@ if collisions:
             hits -= 1
             miss += 1
 
-report_lines[4] = "- **matched: {}  /  ambiguous: {}  /  miss: {}**\n".format(hits, ambig, miss)
+# Insert (don't overwrite) — index 4 is the table's header row, and clobbering
+# it leaves a markdown table with no header that renders as raw pipes.
+report_lines.insert(4, "- **matched: {}  /  ambiguous: {}  /  miss: {}**\n".format(hits, ambig, miss))
 PROJ.match_report.write_text("\n".join(report_lines), encoding="utf-8")
 PROJ.match_index.write_text(json.dumps(index, indent=2, ensure_ascii=False), encoding="utf-8")
 
